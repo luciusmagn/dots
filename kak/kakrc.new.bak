@@ -1,0 +1,203 @@
+###############################################################################
+#                                                                             #
+#                                                                             #
+#                           magnusi config file                               #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+###
+###
+### Load external tools
+###
+###
+
+# Load the plugin manager
+source "%val{config}/plugins/plug.kak/rc/plug.kak"
+# Load stoand/kakoune-idris
+source ~/.kakoune-idris/idris.kak
+map global normal <minus> ':enter-user-mode idris-ide<ret>'
+
+# General dependencies
+plug "andreyorst/plug.kak" noload
+plug "gustavo-hms/luar"
+
+# Init kcr <- you need it installed on the system
+# see: kakoune.cr
+evaluate-commands %sh{
+  kcr init kakoune
+}
+
+## LSP
+eval %sh{kak-lsp --kakoune -s $kak_session}
+lsp-enable
+
+###
+###
+### Looks
+###
+###
+
+# Colorscheme
+colorscheme base16-magnusi
+
+# Show white spaces
+add-highlighter global/ show-whitespaces
+
+
+# Add line number in relative mode
+add-highlighter global/ number-lines -relative -hlcursor -separator ' '
+
+# To have clean tabs with Kakoune
+set-option global tabstop 4
+set-option global indentwidth 4
+set-option global scrolloff 2,4
+
+###
+###
+### Custom commands
+###
+###
+
+# format on save
+define-command format-on-save "hook buffer BufWritePre .* format"
+
+define-command move-line-above -params 0..1 -docstring 'move-line-above [count]: Select full lines and move line above' %{
+  execute-keys -itersel "<a-x>yd%arg{1}k<a-P>"
+}
+
+# Moving lines
+define-command move-line-below -params 0..1 -docstring 'move-line-below [count]: Select full lines and move line below' %{
+  execute-keys -itersel "<a-x>yd%arg{1}j<a-P>"
+}
+
+# move lines up and down
+map global normal <c-up> '<esc>:move-line-above 1<ret>'
+map global normal <c-down> '<esc>:move-line-below 1<ret>'
+map global insert <c-up> '<esc>:move-line-above 1<ret>i'
+map global insert <c-down> '<esc>:move-line-below 1<ret>i'
+
+# swap between buffers
+map global normal <a-left> '<esc>:buffer-previous<ret>'
+map global normal <a-right> '<esc>:buffer-next<ret>'
+map global insert <a-left> '<esc>:buffer-previous<ret>i'
+map global insert <a-right> '<esc>:buffer-next<ret>i'
+
+###
+###
+### Plugins
+###
+###
+
+# exploration
+plug "luciusmagn/old-explore"
+
+# Have clean and soft tabs
+plug "andreyorst/smarttab.kak" defer smarttab %{
+    # when `backspace' is pressed, 4 spaces are deleted at once
+    set-option global softtabstop 4
+} config %{
+    hook global WinSetOption filetype=(rust|markdown|lisp|scheme|sh|perl) expandtab
+    hook global WinSetOption filetype=(makefile|gas|kak) noexpandtab
+    hook global WinSetOption filetype=(c|cpp) smarttab
+}
+
+# Pairs stuff
+plug "alexherbo2/auto-pairs.kak" %{
+	require-module auto-pairs
+	hook global WinCreate .* %{
+		auto-pairs-enable
+		set buffer auto_pairs ( ) { } [ ] \" \" ` `
+	}
+}
+
+# Highlight line/column
+plug "insipx/kak-crosshairs" %{
+	cursorline
+	set-face global crosshairs_line default,rgb:383838+b
+	set-face global crosshairs_column default,rgb:383838+b
+}
+
+plug "lePerdu/kakboard" %{
+	hook global WinCreate .* %{ kakboard-enable }
+}
+
+plug "enricozb/tabs.kak" %{
+	set-option global modelinefmt_tabs '{Information}[%val{client}] {magenta}[%val{session}] {green}%val{cursor_line}:%val{cursor_char_column} {{context_info}} {{mode_info}}'
+	map global normal <tab> ': enter-user-mode tabs<ret>' -docstring 'tabs'
+} config %{
+	set-option global modeline_tabs_percentage 65
+}
+
+###
+###
+### File types
+###
+###
+
+hook global InsertChar \n %{ try %{ exec -draft k<a-x> s^\h+<ret>y j<a-h>P }}
+
+hook global WinSetOption filetype=rust %{
+	set buffer formatcmd 'rustfmt'
+
+	set global lsp_hover_anchor false
+	lsp-auto-signature-help-enable
+	lsp-auto-hover-insert-mode-enable
+	#lsp-inlay-diagnostics-enable global
+
+	#inlay hints
+	hook window -group rust-inlay-hints BufReload .* rust-analyzer-inlay-hints
+	hook window -group rust-inlay-hints NormalIdle .* rust-analyzer-inlay-hints
+	hook window -group rust-inlay-hints InsertIdle .* rust-analyzer-inlay-hints
+
+	#semantic tokens
+	hook window -group semantic-tokens BufReload .* lsp-semantic-tokens
+	hook window -group semantic-tokens NormalIdle .* lsp-semantic-tokens
+	hook window -group semantic-tokens InsertIdle .* lsp-semantic-tokens
+
+	# remove these hooks outside rust
+	hook -once -always window WinSetOption filetype=.* %{
+		remove-hooks window rust-inlay-hints
+		remove-hooks window semantic-tokens
+	}
+}
+
+hook global WinSetOption filetype=git-commit %{
+	add-highlighter buffer/ wrap -word -width 72
+}
+
+hook global WinSetOption filetype=rust %{
+	set window formatcmd 'rustfmt --edition 2021'
+	format-on-save
+}
+
+###
+###
+### Other hooks
+###
+###
+
+hook global BufCreate .* %{
+	declare-option line-specs my_flags
+	set-option global my_flags %val{timestamp} '1| '
+	#add-highlighter global/ flag-lines default,rgb:212121 my_flags
+	add-highlighter global/ regex '[ \t]+$' 0:Error
+	add-highlighter global/ show-matching
+}
+
+hook global InsertCompletionShow .* %{
+	try	%{
+		# this command temporarily removes cursors preceded	by whitespace;
+		# if there are no cursors left, it raises an error, does not
+		# continue to execute the mapping commands, and the error is eaten
+		# by the `try` command so no warning appears.
+		execute-keys -draft	'h<a-K>\h<ret>'
+		map	window insert <tab>	<c-n>
+		map	window insert <s-tab> <c-p>
+	}
+}
+
+hook global InsertCompletionHide .* %{
+	unmap window insert <s-tab> <c-p>
+	unmap window insert <tab> <c-n>
+}

@@ -1,0 +1,215 @@
+prefer-no-csd
+
+input {
+    keyboard {
+        xkb {
+            layout "cz"
+            options "ctrl:swapcaps,altwin:swap_lalt_lwin"
+        }
+    }
+
+    touchpad {
+        //tap
+        natural-scroll
+    }
+
+    focus-follows-mouse
+}
+
+output "eDP-1" {
+    mode "2560x1600"
+    scale 1.0
+    position x=0 y=0
+}
+
+output "HDMI-A-1" {
+    mode "3440x1440@59.97"
+    scale 1.0
+    position x=0 y=0
+}
+
+output "HDMI-A-2" {
+    mode "3840x2160@60.00"
+    scale 1.0
+    position x=3440 y=0
+}
+
+layout {
+    gaps 16
+    center-focused-column "never"
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+
+    default-column-width { proportion 0.3; }
+
+    focus-ring {
+        width 1
+        active-color "#ffffff"
+        inactive-color "#505050"
+    }
+
+    border {
+        width 0
+        active-color "#ffffff"
+        inactive-color "#505050"
+    }
+}
+
+//spawn-at-startup "pipewire"
+//spawn-at-startup "wireplumber"
+//spawn-at-startup "pipewire-pulse"
+//spawn-at-startup "feh" "--bg-center" "$HOME/dragonfly.png"
+spawn-at-startup "swaybg" "-c" "#000000" "-m" "fill" "-i" "dragonfly.png"
+spawn-at-startup "wlsunset" "-t" "3500" "-T" "3501"
+spawn-at-startup "dbus-daemon" "--session" "--address=$DBUS_SESSION_BUS_ADDRESS"
+spawn-at-startup "waybar"
+spawn-at-startup "mako"
+//spawn-at-startup "conky" "-c" "$HOME/.conkyrc"
+
+screenshot-path "~/screenshot-%Y-%m-%d_%H-%M-%S.png"
+
+animations {
+    slowdown 0.6
+}
+
+binds {
+    Mod+Shift+Slash { show-hotkey-overlay; }
+
+    XF86AudioRaiseVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute        allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute     allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    Mod+Q { close-window; }
+
+    Mod+Left  { focus-column-left; }
+    Mod+Down  { focus-window-down; }
+    Mod+Up    { focus-window-up; }
+    Mod+Right { focus-column-right; }
+    Mod+H     { focus-column-left; }
+    Mod+J     { focus-window-down; }
+    Mod+K     { focus-window-up; }
+    Mod+L     { focus-column-right; }
+
+    Mod+Ctrl+Left  { move-column-left; }
+    Mod+Ctrl+Down  { move-window-down; }
+    Mod+Ctrl+Up    { move-window-up; }
+    Mod+Ctrl+Right { move-column-right; }
+    Mod+Ctrl+H     { move-column-left; }
+    Mod+Ctrl+J     { move-window-down; }
+    Mod+Ctrl+K     { move-window-up; }
+    Mod+Ctrl+L     { move-column-right; }
+
+    Mod+Home { focus-column-first; }
+    Mod+End  { focus-column-last; }
+    Mod+Ctrl+Home { move-column-to-first; }
+    Mod+Ctrl+End  { move-column-to-last; }
+
+    Mod+Shift+Left  { focus-monitor-left; }
+    Mod+Shift+Down  { focus-monitor-down; }
+    Mod+Shift+Up    { focus-monitor-up; }
+    Mod+Shift+Right { focus-monitor-right; }
+    Mod+Shift+H     { focus-monitor-left; }
+    Mod+Shift+J     { focus-monitor-down; }
+    Mod+Shift+K     { focus-monitor-up; }
+    Mod+Shift+L     { focus-monitor-right; }
+
+    Mod+Shift+Ctrl+Left  { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+Down  { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+Up    { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+Right { move-column-to-monitor-right; }
+    Mod+Shift+Ctrl+H     { move-column-to-monitor-left; }
+    Mod+Shift+Ctrl+J     { move-column-to-monitor-down; }
+    Mod+Shift+Ctrl+K     { move-column-to-monitor-up; }
+    Mod+Shift+Ctrl+L     { move-column-to-monitor-right; }
+
+    Mod+plus       { focus-workspace 1; }
+    Mod+ecaron     { focus-workspace 2; }
+    Mod+scaron     { focus-workspace 3; }
+    Mod+ccaron     { focus-workspace 4; }
+    Mod+rcaron     { focus-workspace 5; }
+    Mod+zcaron     { focus-workspace 6; }
+
+    Mod+Shift+plus   { move-column-to-workspace 1; }
+    Mod+Shift+ecaron { move-column-to-workspace 2; }
+    Mod+Shift+scaron { move-column-to-workspace 3; }
+    Mod+Shift+ccaron { move-column-to-workspace 4; }
+    Mod+Shift+rcaron { move-column-to-workspace 5; }
+    Mod+Shift+zcaron { move-column-to-workspace 6; }
+
+    Mod+Comma  { consume-window-into-column; }
+    Mod+Period { expel-window-from-column; }
+
+    Mod+R { switch-preset-column-width; }
+    Mod+F { maximize-column; }
+    Mod+Shift+F { fullscreen-window; }
+    Mod+C { center-column; }
+
+    Mod+D { set-column-width "-10%"; }
+    Mod+I { set-column-width "+10%"; }
+
+    Mod+Shift+D { set-window-height "-10%"; }
+    Mod+Shift+I { set-window-height "+10%"; }
+
+    Print { screenshot; }
+
+    Mod+Shift+E { quit; }
+
+    Mod+Shift+P { power-off-monitors; }
+
+    // Additional binds similar to your sowm config
+    Mod+P { spawn "wmenu_run" "-f" "ProFontExtended 9" "-n" "#ffffff" "-N" "#000000" "-S" "#E46876" "-s" "#000000"; }
+    Mod+Return { spawn "alacritty"; }
+
+    // Toggle between eGPU and internal GPU
+    Mod+G { spawn "toggle_gpu"; }
+}
+
+window-rule {
+    draw-border-with-background false
+}
+
+environment {
+    MOZ_ENABLE_WAYLAND "1"
+    MOZ_USE_XINPUT2 "1"
+    MOZ_DBUS_REMOTE "1"
+    GTK_CSD "0"
+    GDK_SCALE "1"
+    GDK_DPI_SCALE "1"
+    QT_AUTO_SCREEN_SCALE_FACTOR "0"
+    QT_SCALE_FACTOR "1"
+    QT_WAYLAND_DISABLE_WINDOWDECORATION "1"
+    GDK_BACKEND "wayland"
+}
+
+window-rule {
+    match app-id="midori"
+    focus-ring {
+        width 2
+    }
+    draw-border-with-background true
+    default-column-width { proportion 0.5; }
+}
+
+window-rule {
+    match app-id="Alacritty"
+}
+
+window-rule {
+    match app-id="com.obsproject.Studio"
+    default-column-width { proportion 0.7; }
+}
+
+window-rule {
+    match app-id="ffplay"
+    default-column-width { proportion 1.0; }
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+

@@ -1,0 +1,76 @@
+colorscheme default2
+eval %sh{kak-lsp --kakoune -s $kak_session}
+lsp-enable
+
+source "%val{config}/plugins/plug.kak/rc/plug.kak"
+
+#
+# Powerline
+#
+plug "andreyorst/powerline.kak"
+
+#
+# Cursorline
+#
+plug "insipx/kak-crosshairs"
+cursorline
+
+#
+# Smart tab
+#
+plug "andreyorst/smarttab.kak" defer config %{
+	smarttab
+}
+
+#
+# lf
+#
+plug "TeddyDD/kakoune-lf"
+
+#
+# Configuration
+#
+add-highlighter global/ number-lines -hlcursor -separator '  '
+set-option global tabstop 4
+set-option global scrolloff 2,5
+add-highlighter global/ show-matching
+add-highlighter global/ dynregex '\h+$' 0:Error
+
+hook global NormalKey y|d|c %{ nop %sh{
+	printf %s "$kak_main_reg_dquote" | xsel --input --clipboard
+}}
+
+hook global InsertCompletionShow .* %{
+	try %{
+		# this command temporarily removes cursors preceded by whitespace;
+		# if there are no cursors left, it raises an error, does not
+		# continue to execute the mapping commands, and the error is eaten
+		# by the `try` command so no warning appears.
+		execute-keys -draft 'h<a-K>\h<ret>'
+		map window insert <tab> <c-n>
+		map window insert <s-tab> <c-p>
+    }
+}
+hook global InsertCompletionHide .* %{
+    unmap window insert <tab> <c-n>
+    unmap window insert <s-tab> <c-p>
+}
+
+plug "andreyorst/kaktree" defer kaktree %{
+    # settings for fancy icons as on the screenshot above.
+    set-option global kaktree_dir_icon_open  '▾ 🗁 ' # 📂 📁
+    set-option global kaktree_dir_icon_close '▸ 🗀 '
+    set-option global kaktree_file_icon      '⠀⠀🖹 ' # 🖺 🖻
+                                            # ^^ these are not spaces. It is invisible characters.
+                                            # This needed to make folding work correctly if you do
+                                            # space alignment of icons.
+} config %{
+    map global user 'f' ": kaktree-toggle<ret>" -docstring "toggle filetree panel"
+    hook global WinSetOption filetype=kaktree %{
+        remove-highlighter buffer/numbers
+        remove-highlighter buffer/matching
+        remove-highlighter buffer/wrap
+        remove-highlighter buffer/show-whitespaces
+    }
+    kaktree-enable
+}

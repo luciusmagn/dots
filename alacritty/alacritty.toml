@@ -1,0 +1,56 @@
+[cursor]
+style = "Beam"
+
+[font]
+normal = { family = "ProFontExtended", style = "Regular" }
+bold = { family = "ProFontExtended", style = "Regular" }
+bold_italic = { family = "ProFontExtended", style = "Regular" }
+italic = { family = "ProFontExtended", style = "Regular" }
+size = 9
+
+[env]
+WINIT_X11_SCALE_FACTOR = "1.0"
+WINIT_WAYLAND_SCALE_FACTOR = "1.0"
+
+[window.padding]
+x = 10
+y = 10
+
+# Kanagawa Dragon Alacritty Colors
+[colors]
+[colors.primary]
+background = '#080606'
+#background = '#181616'
+foreground = '#c5c9c5'
+
+[colors.normal]
+black   = '#0d0c0c'
+red     = '#c4746e'
+green   = '#8a9a7b'
+yellow  = '#c4b28a'
+blue    = '#8ba4b0'
+magenta = '#a292a3'
+cyan    = '#8ea4a2'
+white   = '#C8C093'
+
+[colors.bright]
+black   = '#a6a69c'
+red     = '#E46876'
+green   = '#87a987'
+yellow  = '#E6C384'
+blue    = '#7FB4CA'
+magenta = '#938AA9'
+cyan    = '#7AA89F'
+white   = '#c5c9c5'
+
+[colors.selection]
+background = '#2D4F67'
+foreground = '#C8C093'
+
+[[colors.indexed_colors]]
+index = 16
+color = '#b6927b'
+
+[[colors.indexed_colors]]
+index = 17 
+color = '#b98d7b'
