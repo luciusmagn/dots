@@ -3,45 +3,15 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
+(setq user-full-name "Lukáš Hozda"
+      user-mail-address "luk.hozda@gmail.com")
 
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets. It is optional.
-;; (setq user-full-name "John Doe"
-;;       user-mail-address "john@doe.com")
-
-;; Doom exposes five (optional) variables for controlling fonts in Doom:
-;;
-;; - `doom-font' -- the primary font to use
-;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
-;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;; - `doom-symbol-font' -- for symbols
-;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
-;;
-;; See 'C-h v doom-font' for documentation and more examples of what they
-;; accept. For example:
-;;
 (setq doom-font (font-spec :family "ProFontExtended" :size 12))
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
-;;
-;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
-;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
-;; refresh your font settings. If Emacs still can't find your font, it likely
-;; wasn't installed correctly. Font issues are rarely Doom issues!
-
-;; There are two ways to load a theme. Both assume the theme is installed and
-;; available. You can either set `doom-theme' or manually load a theme with the
-;; `load-theme' function. This is the default:
 (setq doom-theme 'kanagawa-dragon)
 
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type t)
 
-;; If you use `org' and don't want your org files in the default location below,
-;; change `org-directory'. It must be set before org loads!
-
+;; ORG SETTINGS GO HERE
 ;; added to resolve issues in the past with org-appear
 (setq org-fold-core-style 'text-properties)
 
@@ -76,283 +46,289 @@
 (setq org-agenda-files (directory-files-recursively "~/org/" "\\.org$"))
 (setq org-roam-directory (file-truename "~/org"))
 (setq org-log-done 'time)
+(setq org-export-with-broken-links t)
 (org-roam-db-autosync-mode)
 
-;; Whenever you reconfigure a package, make sure to wrap your config in an
-;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
-;;
-;;   (after! PACKAGE
-;;     (setq x y))
-;;
-;; The exceptions to this rule:
-;;
-;;   - Setting file/directory variables (like `org-directory')
-;;   - Setting variables which explicitly tell you to set them before their
-;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
-;;   - Setting doom variables (which start with 'doom-' or '+').
-;;
-;; Here are some additional functions/macros that will help you configure Doom.
-;;
-;; - `load!' for loading external *.el files relative to this one
-;; - `use-package!' for configuring packages
-;; - `after!' for running code after a package has loaded
-;; - `add-load-path!' for adding directories to the `load-path', relative to
-;;   this file. Emacs searches the `load-path' when you load packages with
-;;   `require' or `use-package'.
-;; - `map!' for binding new keys
-;;
-;; To get information about any of these functions/macros, move the cursor over
-;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
-;; This will open documentation for it, including demos of how they are used.
-;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
-;; etc).
-;;
-;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
-;;(custom-set-faces!
-;;  '(doom-dashboard-banner :background "#080606")
-;;  '(doom-dashboard-footer :background "#080606")
-;;  '(doom-dashboard-footer-icon :background "#080606")
-;;  '(doom-dashboard-loaded :background "#080606")
-;;  '(doom-dashboard-menu-desc :background "#080606")
-;;  '(doom-dashboard-menu-title :background "#080606"))
 
-(setq evil-move-beyond-eol t)
-(setq evil-move-cursor-back nil)
+(use-package! org-auto-tangle
+  :hook (org-mode . org-auto-tangle-mode))
 
-;; drag my shit
-(map! :nv "C-<up>"   #'drag-stuff-up
-      :nv "C-<down>" #'drag-stuff-down)
 
-;; make Left and Right navigation go to prev/next line
-(defun my/evil-backward-char-wrap ()
+;;
+;;
+;; MEOWBINDINGS
+;;
+;;
+(defun meow-kakoune-x ()
+  "Implement Kakoune-like behavior for x key."
   (interactive)
-  (if (bolp)
+  (if (region-active-p)
       (progn
-        (forward-line -1)
-        (end-of-line))
-    (evil-backward-char)))
+        (meow-next 1)
+        (meow-line 1))
+    (meow-line 1)))
 
-(defun my/evil-forward-char-wrap ()
-  (interactive)
-  (if (eolp)
-      (progn
-        (forward-line)
-        (evil-first-non-blank))
-    (evil-forward-char)))
-
-(map! :n "h" #'my/evil-backward-char-wrap
-      :n "l" #'my/evil-forward-char-wrap
-      :n "<left>" #'my/evil-backward-char-wrap
-      :n "<right>" #'my/evil-forward-char-wrap)
-
-(define-key evil-normal-state-map (kbd "<left>") #'my/evil-backward-char-wrap)
-(define-key evil-normal-state-map (kbd "<right>") #'my/evil-forward-char-wrap)
-
-;; X behavior from kakoune
-(defun my/evil-select-line-or-next ()
-  (interactive)
-  (if (evil-visual-state-p)
-      (progn
-        (evil-end-of-line)
-        (evil-visual-line))
-    (evil-visual-line)))
-
-(define-key evil-normal-state-map (kbd "X") #'my/evil-select-line-or-next)
-(define-key evil-visual-state-map (kbd "X") #'my/evil-select-line-or-next)
-
-;; Select current line or next line selection
-(defun my/evil-select-line-or-next-line ()
-  (interactive)
-  (if (evil-visual-state-p)
-      (if (and (eq evil-visual-selection 'line)
-               (= (line-number-at-pos (point)) (line-number-at-pos (mark))))
-          (progn
-            (evil-exit-visual-state)
-            (evil-next-line)
-            (evil-visual-line))
-        (evil-visual-line))
-    (evil-visual-line)))
-
-(define-key evil-normal-state-map (kbd "x") #'my/evil-select-line-or-next-line)
-(define-key evil-visual-state-map (kbd "x") #'my/evil-select-line-or-next-line)
-
-
-;; Select next word or extend word selection
-(defun my/evil-select-word-or-next ()
-  (interactive)
-  (if (evil-visual-state-p)
-      (evil-forward-word-end)
-    (evil-visual-word)))
-
-(define-key evil-normal-state-map (kbd "w") #'my/evil-select-word-or-next)
-(define-key evil-visual-state-map (kbd "w") #'my/evil-select-word-or-next)
-
-;; Select next WORD or extend WORD selection
-(defun my/evil-select-WORD-or-next ()
-  (interactive)
-  (if (evil-visual-state-p)
-      (evil-forward-WORD-end)
-    (evil-visual-WORD)))
-
-(define-key evil-normal-state-map (kbd "W") #'my/evil-select-WORD-or-next)
-(define-key evil-visual-state-map (kbd "W") #'my/evil-select-WORD-or-next)
-
-
-;; Unbind 'G' and rebind it to its original function
-(define-key evil-motion-state-map (kbd "G") nil)
-(define-key evil-motion-state-map (kbd "G G") 'evil-goto-line)
-
-;; Select from cursor to end of file
-(defun my/evil-select-to-file-end ()
-  (interactive)
-  (evil-visual-line)
-  (evil-goto-line))
-
-(define-key evil-normal-state-map (kbd "G j") #'my/evil-select-to-file-end)
-(define-key evil-visual-state-map (kbd "G j") #'my/evil-select-to-file-end)
-
-;; Select from beginning of file to cursor
-(defun my/evil-select-to-file-begin ()
-  (interactive)
-  (evil-visual-line)
-  (evil-goto-first-line))
-
-(define-key evil-normal-state-map (kbd "G k") #'my/evil-select-to-file-begin)
-(define-key evil-visual-state-map (kbd "G k") #'my/evil-select-to-file-begin)
-
-;; Go to bottom of file
-(define-key evil-normal-state-map (kbd "g j") #'evil-goto-line)
-
-;; Go to top of file
-(define-key evil-normal-state-map (kbd "g k") #'evil-goto-first-line)
-
-;; Select whole file
-(defun my/evil-select-whole-buffer ()
-  (interactive)
-  (evil-goto-first-line)
-  (evil-visual-line)
-  (evil-goto-line))
-
-(define-key evil-normal-state-map (kbd "%") #'my/evil-select-whole-buffer)
-
-;; Make sure evil-multiedit is loaded
-(use-package! evil-multiedit)
-
-;; Add cursor to next line
-(defun my/evil-mc-add-cursor-next-line ()
-  (interactive)
-  (evil-mc-pause-cursors)
-  (evil-mc-make-cursor-move-next-line 1)
-  (evil-mc-resume-cursors))
-
-;; Reduce to last cursor
-(defun my/evil-mc-reduce-to-last-cursor ()
-  (interactive)
-  (evil-mc-undo-all-cursors))
-
-;; Bind C to add cursor to next line
-(define-key evil-normal-state-map (kbd "C") #'my/evil-mc-add-cursor-next-line)
-(define-key evil-visual-state-map (kbd "C") #'my/evil-mc-add-cursor-next-line)
-
-;; Unbind SPC SPC and rebind to reduce cursors
-(map! :leader
-      :desc "Reduce to last cursor" "SPC" #'my/evil-mc-reduce-to-last-cursor)
-
-;; Make sub-selections based on pattern
-(defun my/evil-select-pattern (pattern)
-  (interactive "sEnter pattern: ")
-  (when (evil-visual-state-p)
-    (let ((start (region-beginning))
-          (end (region-end)))
-      (evil-exit-visual-state)
-      (goto-char start)
-      (evil-mc-pause-cursors)
-      (evil-mc-make-cursor-here)
-      (while (re-search-forward pattern end t)
-        (evil-mc-make-cursor-at-pos (match-beginning 0))
-        (goto-char (match-end 0)))
-      (evil-mc-resume-cursors)
-      (evil-mc-make-and-goto-first-cursor)
-      (evil-visual-char)
-      (evil-forward-char (- (match-end 0) (match-beginning 0))))))
-
-(define-key evil-visual-state-map (kbd "s") #'my/evil-select-pattern)
-
-;; Navigate to previous buffer
-(defun my/previous-file ()
-  (interactive)
-  (previous-buffer))
-
-;; Navigate to next buffer
-(defun my/next-file ()
-  (interactive)
-  (next-buffer))
-
-;; Bind Alt-left to previous file and Alt-right to next file
-(define-key evil-normal-state-map (kbd "M-<left>") #'my/previous-file)
-(define-key evil-normal-state-map (kbd "M-<right>") #'my/next-file)
-
-;; Also bind for other states if needed
-(define-key evil-insert-state-map (kbd "M-<left>") #'my/previous-file)
-(define-key evil-insert-state-map (kbd "M-<right>") #'my/next-file)
-(define-key evil-visual-state-map (kbd "M-<left>") #'my/previous-file)
-(define-key evil-visual-state-map (kbd "M-<right>") #'my/next-file)
-
-;; Rebind word swapping to Ctrl-Alt-left and Ctrl-Alt-right
-;;(define-key evil-normal-state-map (kbd "S-M-<left>") #'evil-backward-word-exchange)
-;;(define-key evil-normal-state-map (kbd "S-M-<right>") #'evil-forward-word-exchange)
-
-;; Custom Ex commands for buffer management
-(defun kill-this-buffer-volatile ()
-    "Kill current buffer, even if it has been modified."
+(defun meow-move-and-cancel (move-func)
+  "Move using MOVE-FUNC and cancel the selection."
+  (lambda ()
     (interactive)
-    (set-buffer-modified-p nil)
-    (kill-this-buffer))
+    (funcall move-func 1)
+    (meow-cancel-selection)))
 
-(evil-ex-define-cmd "db!" (lambda () (interactive) (kill-this-buffer-volatile)))
-(evil-ex-define-cmd "db" 'kill-this-buffer)
-(evil-ex-define-cmd "b" 'consult-buffer)
-
-(defun find-file-in-current-directory ()
-  "Open file dialog starting from the directory of the current buffer."
+(defun meow-kakoune-end-of-buffer ()
+  "Move to the end of the buffer without selecting."
   (interactive)
-  (let ((default-directory (or (and (buffer-file-name)
-                                    (file-name-directory (buffer-file-name)))
-                               default-directory)))
-    (call-interactively 'find-file)))
+  (goto-char (point-max))
+  (meow-cancel-selection))
 
-(evil-ex-define-cmd "e" 'find-file-in-current-directory)
-
-;; Left-Right pane spawning
-(defun my/split-window-right-and-focus ()
-  "Split the window vertically and focus the new window."
+(defun meow-kakoune-beginning-of-buffer ()
+  "Move to the beginning of the buffer without selecting."
   (interactive)
-  (split-window-right)
-  (windmove-right))
+  (goto-char (point-min))
+  (meow-cancel-selection))
 
-(defun my/split-window-left-and-focus ()
-  "Split the window vertically to the left and focus the new window."
+(defun meow-kakoune-select-to-end-of-buffer ()
+  "Select from current point to the end of the buffer."
   (interactive)
-  (split-window-right)
-  (windmove-left))
+  (unless (region-active-p)
+    (push-mark (point) t t))
+  (goto-char (point-max)))
 
-(global-set-key (kbd "C-M-<right>") #'my/split-window-right-and-focus)
-(global-set-key (kbd "C-M-<left>") #'my/split-window-left-and-focus)
-(define-key evil-insert-state-map (kbd "C-M-<right>") #'my/split-window-right-and-focus)
-(define-key evil-insert-state-map (kbd "C-M-<left>") #'my/split-window-left-and-focus)
-(define-key evil-normal-state-map (kbd "C-M-<right>") #'my/split-window-right-and-focus)
-(define-key evil-normal-state-map (kbd "C-M-<left>") #'my/split-window-left-and-focus)
-(define-key evil-visual-state-map (kbd "C-M-<right>") #'my/split-window-right-and-focus)
-(define-key evil-visual-state-map (kbd "C-M-<left>") #'my/split-window-left-and-focus)
-
-(defun my/close-current-window ()
-  "Close the current window."
+(defun meow-kakoune-select-to-beginning-of-buffer ()
+  "Select from current point to the beginning of the buffer."
   (interactive)
-  (delete-window))
+  (unless (region-active-p)
+    (push-mark (point) t t))
+  (goto-char (point-min)))
 
-(global-set-key (kbd "C-M-q") #'my/close-current-window)
+(defun meow-goto-line-and-center ()
+  "Go to a specific line number and center the view."
+  (interactive)
+  (let ((line (read-number "Go to line: ")))
+    (goto-line line)
+    (recenter)))
 
-(evil-ex-define-cmd "ld" 'lsp-ui-flycheck-list)
-(evil-ex-define-cmd "le" 'lsp-treemacs-errors-list)
-(evil-ex-define-cmd "lf" 'flycheck-list-errors)
+(defvar meow-kakoune-g-map (make-sparse-keymap)
+  "Keymap for g prefix in Kakoune-like setup.")
+
+(defvar meow-kakoune-G-map (make-sparse-keymap)
+  "Keymap for G prefix in Kakoune-like setup.")
+
+(defun meow-kakoune-g-prefix ()
+  "Handle g prefix commands."
+  (interactive)
+  (let ((next-key (read-key "g-")))
+    (let ((cmd (lookup-key meow-kakoune-g-map (vector next-key))))
+      (if cmd
+          (call-interactively cmd)
+        (message "No such g- command: %c" next-key)))))
+
+(defun meow-kakoune-G-prefix ()
+  "Handle G prefix commands."
+  (interactive)
+  (let ((next-key (read-key "G-")))
+    (let ((cmd (lookup-key meow-kakoune-G-map (vector next-key))))
+      (if cmd
+          (call-interactively cmd)
+        (message "No such G- command: %c" next-key)))))
+
+(defun force-kill-current-buffer ()
+  "Kill the current buffer without confirmation."
+  (interactive)
+  (set-buffer-modified-p nil)
+  (kill-buffer (current-buffer)))
+
+(defun force-kill-emacs ()
+  "Kill Emacs without confirmation."
+  (interactive)
+  (kill-emacs))
+
+(defun save-buffer-or-file (file)
+  "Save the current buffer, or write it to FILE if provided."
+  (if file
+      (write-file file)
+    (save-buffer)))
+
+(map! :leader
+      :desc "Reload config" "h r r" #'doom/reload
+      :desc "Open dired here" "." #'find-file
+      :desc "Open org-agenda" "o a" #'org-agenda)
+
+(defun simulate-vim-command-line ()
+  (interactive)
+  (let* ((input (read-string ":"))
+         (parts (split-string input " " t))
+         (cmd (car parts))
+         (args (cdr parts)))
+    (cond
+     ((string= cmd "e") (call-interactively #'find-file))
+     ((string= cmd "b") (call-interactively #'consult-buffer))
+     ((string= cmd "db") (call-interactively #'kill-current-buffer))
+     ((string= cmd "db!") (force-kill-current-buffer))
+     ((string= cmd "q") (save-buffers-kill-terminal))
+     ((string= cmd "q!") (force-kill-emacs))
+     ((string= cmd "w") (save-buffer-or-file (car args)))
+     ((string= cmd "%") (meow-select-buffer))
+     (t (message "Unknown command: %s" cmd)))))
+
+
+(map! :map meow-normal-state-keymap
+      ":" #'simulate-vim-command-line)
+
+(defun meow-select-buffer ()
+  "Select the entire buffer."
+  (interactive)
+  (meow-bounds-of-thing ?b))
+
+(defun indent-selection ()
+  "Indent the current selection or line."
+  (interactive)
+  (let ((deactivate-mark nil)  ; Preserve the selection
+        (indent-size 4))       ; Use 4 spaces for indentation
+    (if (region-active-p)
+        (indent-rigidly (region-beginning) (region-end) indent-size)
+      (indent-rigidly (line-beginning-position) (line-end-position) indent-size))))
+
+(defun unindent-selection ()
+  "Unindent the current selection or line."
+  (interactive)
+  (let ((deactivate-mark nil)  ; Preserve the selection
+        (indent-size -4))      ; Use 4 spaces for unindentation (negative)
+    (if (region-active-p)
+        (indent-rigidly (region-beginning) (region-end) indent-size)
+      (indent-rigidly (line-beginning-position) (line-end-position) indent-size))))
+
+(defun meow-kakoune-w ()
+  "Implement Kakoune-like behavior for w key."
+  (interactive)
+  (if (region-active-p)
+      (progn
+        (meow-next-word 1)
+        (meow-mark-word 1))
+    (meow-mark-word 1)))
+
+(defun meow-kakoune-W ()
+  "Implement Kakoune-like behavior for W key."
+  (interactive)
+  (if (region-active-p)
+      (meow-next-word 1)
+    (meow-mark-word 1)))
+
+(defun meow-goto-line-and-center ()
+  "Go to a specific line number and center the view."
+  (interactive)
+  (let ((line (read-number "Go to line: ")))
+    (goto-char (point-min))
+    (forward-line (1- line))
+    (recenter)))
+
+(defun meow-setup-kakoune ()
+  (setq meow-cheatsheet-layout meow-cheatsheet-layout-qwerty)
+  (meow-motion-overwrite-define-key
+   '("j" . meow-next)
+   '("k" . meow-prev)
+   '("h" . meow-left)
+   '("l" . meow-right))
+
+  (meow-leader-define-key
+   '("." . find-file)
+   '("j" . "H-j")
+   '("k" . "H-k")
+   '("/" . meow-visit)
+   '("?" . (lambda () (interactive) (let ((current-prefix-arg '-)) (meow-visit))))
+   '("n" . meow-search)
+   '("N" . (lambda () (interactive) (let ((current-prefix-arg '-)) (meow-search))))
+   '("s" . save-buffer)
+   '("b" . switch-to-buffer)
+   '("w" . kill-current-buffer))
+
+  (meow-normal-define-key
+   '("0" . meow-expand-0)
+   '("9" . meow-expand-9)
+   '("8" . meow-expand-8)
+   '("7" . meow-expand-7)
+   '("6" . meow-expand-6)
+   '("5" . meow-expand-5)
+   '("4" . meow-expand-4)
+   '("3" . meow-expand-3)
+   '("2" . meow-expand-2)
+   '("1" . meow-expand-1)
+   '("-" . negative-argument)
+   '(";" . meow-reverse)
+   '("," . meow-inner-of-thing)
+   '("." . meow-bounds-of-thing)
+   '("[" . meow-beginning-of-thing)
+   '("]" . meow-end-of-thing)
+   '("a" . meow-append)
+   '("A" . meow-open-below)
+   '("b" . meow-back-word)
+   '("B" . meow-back-symbol)
+   '("c" . meow-change)
+   '("d" . meow-kill)
+   '("D" . meow-backward-delete)
+   '("e" . meow-next-word)
+   '("E" . meow-next-symbol)
+   '("g" . meow-kakoune-g-prefix)
+   '("G" . meow-kakoune-G-prefix)
+   '("h" . meow-left)
+   '("H" . meow-left-expand)
+   '("i" . meow-insert)
+   '("I" . meow-open-above)
+   '("j" . meow-next)
+   '("J" . meow-next-expand)
+   '("k" . meow-prev)
+   '("K" . meow-prev-expand)
+   '("l" . meow-right)
+   '("L" . meow-right-expand)
+   '("m" . meow-join)
+   '("n" . meow-search)
+   '("o" . meow-block)
+   '("O" . meow-to-block)
+   '("p" . meow-yank)
+   '("q" . meow-quit)
+   '("Q" . meow-goto-line)
+   '("r" . meow-replace)
+   '("R" . meow-swap-grab)
+   '("t" . meow-till)
+   '("f" . meow-find)
+   '("u" . meow-undo)
+   '("U" . meow-redo)
+   '("v" . meow-visit)
+   '("w" . meow-kakoune-w)
+   '("W" . meow-kakoune-W)
+   '("x" . meow-kakoune-x)
+   '("X" . meow-line-expand)
+   '("y" . meow-save)
+   '("Y" . meow-sync-grab)
+   '("z" . meow-pop-selection)
+   '("'" . repeat)
+   '("<" . unindent-selection)
+   '(">" . indent-selection)
+   '("<escape>" . meow-cancel-selection)
+   '("%" . meow-select-buffer)
+   '(":" . simulate-vim-command-line)
+   '("<M-left>" . previous-buffer)
+   '("<M-right>" . next-buffer)
+   '("<C-up>" . drag-stuff-up)
+   '("<C-down>" . drag-stuff-down)
+   '("<up>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'previous-line))))
+   '("<down>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'next-line))))
+   '("<left>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'left-char))))
+   '("<right>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'right-char))))
+
+  ;; Define g prefix keymap
+  (define-key meow-kakoune-g-map (kbd "g") #'meow-goto-line-and-center)
+  (define-key meow-kakoune-g-map (kbd "j") #'meow-kakoune-end-of-buffer)
+  (define-key meow-kakoune-g-map (kbd "k") #'meow-kakoune-beginning-of-buffer)
+
+  ;; Define G prefix keymap
+  (define-key meow-kakoune-G-map (kbd "j") #'meow-kakoune-select-to-end-of-buffer)
+  (define-key meow-kakoune-G-map (kbd "k") #'meow-kakoune-select-to-beginning-of-buffer)))
+
+(meow-setup-kakoune)
+
+(global-set-key (kbd "M-<left>") 'previous-buffer)
+(global-set-key (kbd "M-<right>") 'next-buffer)
+(global-set-key (kbd "<C-up>") 'drag-stuff-up)
+(global-set-key (kbd "<C-down>") 'drag-stuff-down)
+
