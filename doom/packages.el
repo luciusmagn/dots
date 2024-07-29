@@ -48,3 +48,9 @@
 ;; (unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
+
+;; org appear
+(package! org-appear :recipe
+  (:host github
+   :repo "awth13/org-appear"
+   :branch "org-9.7-fixes"))

@@ -41,9 +41,41 @@
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
+
+;; added to resolve issues in the past with org-appear
+(setq org-fold-core-style 'text-properties)
+
+;; org appear
+(use-package org-appear
+  :after org
+  :ensure t
+  :hook (org-mode . org-appear-mode)
+  :config
+  (setq
+    org-link-descriptive t
+    org-hide-emphasis-markers t
+    org-appear-trigger 'manual
+    org-appear-autolinks t
+    org-appear-autoemphasis t
+    org-appear-autosubmarkers t
+    org-appear-autoentities t
+    org-appear-autokeywords t
+    org-appear-inside-latex t
+    org-appear-delay 0.0))
+(add-hook 'org-mode-hook (lambda ()
+        (add-hook 'evil-insert-state-entry-hook
+                #'org-appear-manual-start
+                nil
+                t)
+        (add-hook 'evil-insert-state-exit-hook
+                #'org-appear-manual-stop
+                nil
+                t)))
+
 (setq org-directory "~/org/")
 (setq org-agenda-files (directory-files-recursively "~/org/" "\\.org$"))
 (setq org-roam-directory (file-truename "~/org"))
+(setq org-log-done 'time)
 (org-roam-db-autosync-mode)
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
