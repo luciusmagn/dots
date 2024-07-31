@@ -1,8 +1,5 @@
 ;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
 
-;; Place your private configuration here! Remember, you do not need to run 'doom
-;; sync' after modifying this file!
-
 (setq user-full-name "Lukáš Hozda"
       user-mail-address "luk.hozda@gmail.com")
 
@@ -53,12 +50,21 @@
 (use-package! org-auto-tangle
   :hook (org-mode . org-auto-tangle-mode))
 
-
 ;;
 ;;
 ;; MEOWBINDINGS
 ;;
 ;;
+(setq meow-use-clipboard t)
+(meow-setup-indicator)
+
+;; redos are fucking weird in emacs, man
+(defun meow-redo ()
+  "Custom redo function for Meow."
+  (interactive)
+  (ignore-errors (meow-cancel))
+  (meow-undo))
+
 (defun meow-kakoune-x ()
   "Implement Kakoune-like behavior for x key."
   (interactive)
@@ -100,13 +106,6 @@
   (unless (region-active-p)
     (push-mark (point) t t))
   (goto-char (point-min)))
-
-(defun meow-goto-line-and-center ()
-  "Go to a specific line number and center the view."
-  (interactive)
-  (let ((line (read-number "Go to line: ")))
-    (goto-line line)
-    (recenter)))
 
 (defvar meow-kakoune-g-map (make-sparse-keymap)
   "Keymap for g prefix in Kakoune-like setup.")
@@ -171,7 +170,6 @@
      ((string= cmd "%") (meow-select-buffer))
      (t (message "Unknown command: %s" cmd)))))
 
-
 (map! :map meow-normal-state-keymap
       ":" #'simulate-vim-command-line)
 
@@ -231,7 +229,7 @@
    '("l" . meow-right))
 
   (meow-leader-define-key
-   '("." . find-file)
+   ;;'("." . find-file)
    '("j" . "H-j")
    '("k" . "H-k")
    '("/" . meow-visit)
@@ -259,6 +257,7 @@
    '("." . meow-bounds-of-thing)
    '("[" . meow-beginning-of-thing)
    '("]" . meow-end-of-thing)
+   '("/" . meow-visit)
    '("a" . meow-append)
    '("A" . meow-open-below)
    '("b" . meow-back-word)
@@ -332,3 +331,12 @@
 (global-set-key (kbd "<C-up>") 'drag-stuff-up)
 (global-set-key (kbd "<C-down>") 'drag-stuff-down)
 
+;; I need THIS
+(after! org
+  (map! :map org-mode-map
+        :localleader
+        "s" nil))  ; This unbinds SPC m s in org-mode
+
+(after! org
+  (map! :map org-mode-map
+        "C-c o ." #'org-time-stamp))
