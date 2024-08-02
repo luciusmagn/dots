@@ -8,6 +8,10 @@
 
 (setq display-line-numbers-type t)
 
+;; RUST
+(minimap-mode)
+(setq rust-format-on-save t)
+
 ;; ORG SETTINGS GO HERE
 ;; added to resolve issues in the past with org-appear
 (setq org-fold-core-style 'text-properties)
@@ -46,7 +50,6 @@
 (setq org-export-with-broken-links t)
 (org-roam-db-autosync-mode)
 
-
 (use-package! org-auto-tangle
   :hook (org-mode . org-auto-tangle-mode))
 
@@ -55,7 +58,9 @@
 ;; MEOWBINDINGS
 ;;
 ;;
+
 (setq meow-use-clipboard t)
+(setq meow-visit-sanitize-completion nil)
 (meow-setup-indicator)
 
 ;; redos are fucking weird in emacs, man
@@ -167,6 +172,9 @@
      ((string= cmd "q") (save-buffers-kill-terminal))
      ((string= cmd "q!") (force-kill-emacs))
      ((string= cmd "w") (save-buffer-or-file (car args)))
+     ((string= cmd "wq") (progn
+                           (save-buffer)
+                           (save-buffers-kill-terminal)))
      ((string= cmd "%") (meow-select-buffer))
      (t (message "Unknown command: %s" cmd)))))
 
@@ -260,13 +268,10 @@
    '("/" . meow-visit)
    '("a" . meow-append)
    '("A" . meow-open-below)
-   '("b" . meow-back-word)
-   '("B" . meow-back-symbol)
+   '("b" . meow-grab)
    '("c" . meow-change)
    '("d" . meow-kill)
    '("D" . meow-backward-delete)
-   '("e" . meow-next-word)
-   '("E" . meow-next-symbol)
    '("g" . meow-kakoune-g-prefix)
    '("G" . meow-kakoune-G-prefix)
    '("h" . meow-left)
@@ -299,7 +304,7 @@
    '("X" . meow-line-expand)
    '("y" . meow-save)
    '("Y" . meow-sync-grab)
-   '("z" . meow-pop-selection)
+   '("B" . meow-pop-selection)
    '("'" . repeat)
    '("<" . unindent-selection)
    '(">" . indent-selection)
@@ -314,6 +319,10 @@
    '("<down>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'next-line))))
    '("<left>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'left-char))))
    '("<right>" . (lambda () (interactive) (funcall (meow-move-and-cancel #'right-char))))
+   '("S-<up>" . meow-prev-expand)
+   '("S-<down>" . meow-next-expand)
+   '("S-<left>" . meow-left-expand)
+   '("S-<right>" . meow-right-expand)
 
   ;; Define g prefix keymap
   (define-key meow-kakoune-g-map (kbd "g") #'meow-goto-line-and-center)

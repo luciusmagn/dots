@@ -52,5 +52,7 @@
 ;; org appear
 (package! org-appear :recipe
   (:host github
-   :repo "awth13/org-appear"
-   :branch "org-9.7-fixes"))
+   :repo "awth13/org-appear"))
+
+;; we tangle that shit
+(package! org-auto-tangle)
